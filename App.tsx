@@ -35,7 +35,7 @@ interface WatchData {
   searches: any[];
 }
 
-const App: React.FC = () => {
+export default function App() {
   const [currentView, setCurrentView] = useState<AppView>(AppView.LOGIN);
   const [selectedChar, setSelectedChar] = useState<Character | null>(null);
   const [chatSession, setChatSession] = useState<Chat | null>(null);
@@ -262,7 +262,7 @@ const App: React.FC = () => {
             onClick={() => handleSelectCharacter(char)}
             className="group relative bg-slate-900 border border-slate-800 hover:border-purple-600 transition-all duration-300 cursor-pointer overflow-hidden rounded-sm h-[450px]"
           >
-            {/* Image Background Effect - Fixed URL syntax for parentheses */}
+            {/* Image Background Effect */}
             <div className="absolute inset-0 bg-cover bg-center opacity-40 group-hover:opacity-20 transition-opacity duration-500" style={{ backgroundImage: `url("${char.imagePlaceholder}")` }} />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent" />
             
@@ -315,11 +315,10 @@ const App: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             {/* Left Col: Visual & Stats */}
             <div className="flex flex-col gap-8">
-              {/* Aspect Ratio Updated to Square (1:1) */}
+              {/* Aspect Ratio Square (1:1) */}
               <div className="relative aspect-square w-full bg-slate-900 overflow-hidden border border-slate-800">
                 <img src={selectedChar.imagePlaceholder} alt={selectedChar.name} className="w-full h-full object-cover opacity-80" />
                 <div className="absolute bottom-0 left-0 p-8 bg-gradient-to-t from-black to-transparent w-full">
-                  {/* Name overlaid on image if desired, but request says "text part aligned horizontally with image top" */}
                 </div>
               </div>
               
@@ -347,7 +346,7 @@ const App: React.FC = () => {
                     {selectedChar.role}
                  </div>
                  
-                 {/* Updated Profile Section (Markdown Style List) */}
+                 {/* Updated Profile Section */}
                  <div>
                     <strong className="block text-purple-500 mb-2 text-xs uppercase tracking-widest">Profile</strong>
                     <ul className="list-disc pl-4 space-y-1 text-slate-400">
@@ -359,7 +358,7 @@ const App: React.FC = () => {
                     </ul>
                  </div>
 
-                 {/* Updated Personality Section (Markdown Style List) */}
+                 {/* Updated Personality Section */}
                  <div>
                     <strong className="block text-purple-500 mb-2 text-xs uppercase tracking-widest">Personality</strong>
                     <ul className="list-disc pl-4 space-y-1 text-slate-400">
@@ -376,7 +375,7 @@ const App: React.FC = () => {
                     </ul>
                  </div>
 
-                 {/* New Signature Section */}
+                 {/* Signature Section */}
                  {(selectedChar.sigColor || selectedChar.symbol) && (
                     <div className="border-t border-slate-800 pt-6 mt-2">
                       <strong className="block text-purple-500 mb-3 text-xs uppercase tracking-widest">Signature</strong>
@@ -409,7 +408,7 @@ const App: React.FC = () => {
                    <WatchIcon /> ACCESS SAIF WATCH
                  </button>
 
-                 {/* Iframe Music Player */}
+                 {/* Iframe Music Player - Google Drive */}
                  <div className="w-full bg-slate-900 border border-slate-800 p-4 rounded-sm">
                     <div className="flex items-center gap-4 mb-3">
                       <div className="w-8 h-8 bg-purple-900/20 flex items-center justify-center rounded-sm text-purple-500">
@@ -433,8 +432,8 @@ const App: React.FC = () => {
                            height="100" 
                            allow="autoplay"
                            title="Theme Song"
-                           // Style to invert the bright Google Player to dark mode
-                           style={{ filter: 'invert(1) hue-rotate(180deg)', border: 'none' }}
+                           // Style to invert the bright Google Player to dark mode to match theme
+                           style={{ filter: 'invert(1) hue-rotate(180deg) contrast(0.8)', border: 'none' }}
                          ></iframe>
                       </div>
                     ) : (
@@ -444,7 +443,7 @@ const App: React.FC = () => {
                     )}
 
                     <p className="mt-3 text-[10px] text-slate-500 text-center font-sans">
-                        ※ 다운로드 가능합니다. (개인 감상용으로만 사용 가능)
+                        ※ 재생이 안 될 경우 팝업 차단을 확인해주세요.
                     </p>
                  </div>
 
@@ -617,6 +616,4 @@ const App: React.FC = () => {
       {currentView === AppView.CHAT && renderChat()}
     </div>
   );
-};
-
-export default App;
+}
