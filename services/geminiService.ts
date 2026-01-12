@@ -3,14 +3,14 @@ import { CHARACTERS } from "../constants";
 
 let client: GoogleGenAI | null = null;
 
-// Initialize the Gemini client only when needed to handle API Key logic
+// User provided API Key
+const API_KEY = 'AIzaSyA3i3sZUFZ1VhaUvDLscJiOc5hLw2e5wDQ';
+
+// Initialize the Gemini client only when needed
 const getClient = (): GoogleGenAI => {
   if (!client) {
-    if (!process.env.API_KEY) {
-      console.error("API_KEY is missing from environment variables.");
-      throw new Error("API Key is missing.");
-    }
-    client = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    // Direct usage for the user's specific request to fix the app
+    client = new GoogleGenAI({ apiKey: API_KEY });
   }
   return client;
 };
@@ -44,7 +44,7 @@ export const sendMessageToGemini = async (chat: Chat, message: string): Promise<
   }
 };
 
-// Streaming version if we want to implement typing effect later
+// Streaming version
 export const sendMessageStream = async function* (chat: Chat, message: string) {
     const result = await chat.sendMessageStream({ message });
     for await (const chunk of result) {
