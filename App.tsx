@@ -9,9 +9,6 @@ import { Chat } from '@google/genai';
 const BackIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
 );
-const ChatIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z"/><path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"/></svg>
-);
 const SendIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" x2="11" y1="2" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
 );
@@ -51,7 +48,6 @@ export default function App() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Scroll to bottom of chat
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -74,18 +70,16 @@ export default function App() {
   const handleSelectCharacter = (char: Character) => {
     setSelectedChar(char);
     setCurrentView(AppView.CHARACTER_DETAIL);
-    setWatchData(null); // Reset watch data
+    setWatchData(null); 
   };
 
   const generateWatchData = (charId: string) => {
     const pool = WATCH_DATA_POOLS[charId as keyof typeof WATCH_DATA_POOLS] || WATCH_DATA_POOLS['pil-do-seop'];
     
-    // Random Vitals
     const hr = Math.floor(Math.random() * (110 - 65 + 1)) + 65;
     const rr = Math.floor(Math.random() * (22 - 14 + 1)) + 14;
     const temp = (Math.random() * (37.2 - 36.1) + 36.1).toFixed(1);
     
-    // Random content
     const location = pool.locations[Math.floor(Math.random() * pool.locations.length)];
     const shuffledCalls = [...pool.calls].sort(() => 0.5 - Math.random()).slice(0, 2);
     const shuffledMessages = [...pool.messages].sort(() => 0.5 - Math.random()).slice(0, 2);
@@ -99,7 +93,7 @@ export default function App() {
     try {
       const session = createChatSession(selectedChar.id);
       setChatSession(session);
-      setWatchData(generateWatchData(selectedChar.id)); // Generate data
+      setWatchData(generateWatchData(selectedChar.id)); 
       setMessages([{
         id: 'init',
         role: 'model',
@@ -130,7 +124,6 @@ export default function App() {
       let fullResponse = "";
       const tempId = (Date.now() + 1).toString();
       
-      // Add placeholder for streaming
       setMessages(prev => [...prev, {
         id: tempId,
         role: 'model',
@@ -158,12 +151,10 @@ export default function App() {
 
   const renderLogin = () => (
     <div className="min-h-screen bg-black text-slate-300 flex flex-col items-center justify-center relative font-mono overflow-hidden">
-       {/* Background decoration */}
        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-slate-900/30 via-black to-black" />
        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
        
        <div className="z-10 w-full max-w-sm p-8 border border-slate-800 bg-slate-900/40 backdrop-blur-md relative shadow-2xl">
-          {/* Decorative corners */}
           <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-purple-600"/>
           <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-purple-600"/>
           <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-purple-600"/>
@@ -227,7 +218,6 @@ export default function App() {
 
   const renderHome = () => (
     <div className="min-h-screen bg-neutral-950 text-slate-300 flex flex-col items-center relative">
-      {/* Security Banner */}
       <div className="w-full bg-purple-950/20 border-b border-purple-900/50 py-2 text-center fixed top-0 z-50 backdrop-blur-sm">
          <div className="animate-pulse flex flex-col items-center justify-center">
             <span className="text-[10px] text-purple-400 font-mono tracking-widest uppercase">
@@ -239,7 +229,6 @@ export default function App() {
          </div>
       </div>
 
-      {/* Hero Section */}
       <header className="w-full max-w-4xl pt-28 pb-12 px-6 text-center mt-4">
         <h1 className="text-6xl md:text-8xl font-display font-bold text-white mb-4 tracking-tighter">
           <span className="text-purple-600">PA</span>EDO
@@ -254,7 +243,6 @@ export default function App() {
         </p>
       </header>
 
-      {/* Character Grid */}
       <main className="w-full max-w-6xl px-4 pb-20 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {CHARACTERS.map(char => (
           <div 
@@ -262,11 +250,9 @@ export default function App() {
             onClick={() => handleSelectCharacter(char)}
             className="group relative bg-slate-900 border border-slate-800 hover:border-purple-600 transition-all duration-300 cursor-pointer overflow-hidden rounded-sm h-[450px]"
           >
-            {/* Image Background Effect */}
             <div className="absolute inset-0 bg-cover bg-center opacity-40 group-hover:opacity-20 transition-opacity duration-500" style={{ backgroundImage: `url("${char.imagePlaceholder}")` }} />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent" />
             
-            {/* Content */}
             <div className="absolute bottom-0 w-full p-6 flex flex-col items-start z-10">
               <span className="text-purple-500 text-xs tracking-widest uppercase font-bold mb-1">{char.position}</span>
               <h2 className="text-3xl font-display text-white mb-2">{char.name}</h2>
@@ -281,7 +267,6 @@ export default function App() {
               </p>
             </div>
             
-            {/* Hover Indicator */}
             <div className="absolute top-4 right-4 w-2 h-2 bg-purple-600 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-[0_0_10px_#9333ea]" />
           </div>
         ))}
@@ -297,7 +282,6 @@ export default function App() {
     if (!selectedChar) return null;
     return (
       <div className="min-h-screen bg-black text-slate-200 flex flex-col">
-        {/* Security Banner Detail */}
         <div className="w-full bg-purple-950/20 border-b border-purple-900/50 py-1 text-center backdrop-blur-sm">
              <span className="text-[10px] text-purple-400 font-mono tracking-widest uppercase animate-pulse">
               Class C security clearance authorized
@@ -313,9 +297,7 @@ export default function App() {
           </button>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-            {/* Left Col: Visual & Stats */}
             <div className="flex flex-col gap-8">
-              {/* Aspect Ratio Square (1:1) */}
               <div className="relative aspect-square w-full bg-slate-900 overflow-hidden border border-slate-800">
                 <img src={selectedChar.imagePlaceholder} alt={selectedChar.name} className="w-full h-full object-cover opacity-80" />
                 <div className="absolute bottom-0 left-0 p-8 bg-gradient-to-t from-black to-transparent w-full">
@@ -332,7 +314,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* Right Col: Info */}
             <div className="flex flex-col justify-start space-y-8 pt-0 h-full">
                <div className="border-b border-slate-800 pb-8">
                   <h2 className="text-5xl font-display text-white mb-2">{selectedChar.kanji}</h2>
@@ -346,7 +327,6 @@ export default function App() {
                     {selectedChar.role}
                  </div>
                  
-                 {/* Updated Profile Section */}
                  <div>
                     <strong className="block text-purple-500 mb-2 text-xs uppercase tracking-widest">Profile</strong>
                     <ul className="list-disc pl-4 space-y-1 text-slate-400">
@@ -358,7 +338,6 @@ export default function App() {
                     </ul>
                  </div>
 
-                 {/* Updated Personality Section */}
                  <div>
                     <strong className="block text-purple-500 mb-2 text-xs uppercase tracking-widest">Personality</strong>
                     <ul className="list-disc pl-4 space-y-1 text-slate-400">
@@ -375,7 +354,6 @@ export default function App() {
                     </ul>
                  </div>
 
-                 {/* Signature Section */}
                  {(selectedChar.sigColor || selectedChar.symbol) && (
                     <div className="border-t border-slate-800 pt-6 mt-2">
                       <strong className="block text-purple-500 mb-3 text-xs uppercase tracking-widest">Signature</strong>
@@ -408,7 +386,6 @@ export default function App() {
                    <WatchIcon /> ACCESS SAIF WATCH
                  </button>
 
-                 {/* Iframe Music Player - Google Drive */}
                  <div className="w-full bg-slate-900 border border-slate-800 p-4 rounded-sm">
                     <div className="flex items-center gap-4 mb-3">
                       <div className="w-8 h-8 bg-purple-900/20 flex items-center justify-center rounded-sm text-purple-500">
@@ -432,7 +409,6 @@ export default function App() {
                            height="100" 
                            allow="autoplay"
                            title="Theme Song"
-                           // Style to invert the bright Google Player to dark mode to match theme
                            style={{ filter: 'invert(1) hue-rotate(180deg) contrast(0.8)', border: 'none' }}
                          ></iframe>
                       </div>
@@ -461,7 +437,6 @@ export default function App() {
   const renderChat = () => {
     if (!selectedChar) return null;
 
-    // SAIF Watch OS Interface
     const renderWatchHeader = () => (
       <div className="bg-black border-b border-purple-900/30 p-4 font-mono text-xs text-green-500/80 leading-relaxed shadow-lg mb-4">
          <div className="flex justify-between items-center mb-4 border-b border-purple-900/30 pb-2">
@@ -528,7 +503,6 @@ export default function App() {
 
     return (
       <div className="fixed inset-0 bg-neutral-950 flex flex-col font-sans">
-        {/* Chat Header */}
         <header className="h-16 border-b border-slate-900 bg-slate-950 flex items-center px-4 justify-between shrink-0 z-10">
            <div className="flex items-center gap-3">
              <button onClick={() => setCurrentView(AppView.CHARACTER_DETAIL)} className="text-slate-500 hover:text-white">
@@ -547,9 +521,7 @@ export default function App() {
            </div>
         </header>
 
-        {/* Messages with Watch Data Overlay */}
         <main className="flex-1 overflow-y-auto p-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-black to-black">
-          {/* Render Watch OS Data at the top of the chat stream */}
           <div className="max-w-3xl mx-auto w-full">
              {renderWatchHeader()}
              
@@ -584,7 +556,6 @@ export default function App() {
           </div>
         </main>
 
-        {/* Input */}
         <footer className="p-4 bg-slate-950 border-t border-slate-900 shrink-0">
           <div className="max-w-4xl mx-auto flex gap-2">
             <input 
