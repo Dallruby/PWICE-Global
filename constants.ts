@@ -48,7 +48,7 @@ export const CHARACTERS: Character[] = [
     ],
     imagePlaceholder: 'https://i.postimg.cc/3Rcm4xtP/001.png',
     themeSongTitle: 'Only the strong',
-    themeSongId: '1WbSjCM94nIgh33_L00qh-IpFjdNonuRw',
+    themeSongBase64: './Only the strong.mp3', 
     sigColor: '#000000',
     symbol: 'Black Tiger',
     systemInstruction: `
@@ -84,7 +84,7 @@ export const CHARACTERS: Character[] = [
     ],
     imagePlaceholder: 'https://i.postimg.cc/7YvXmKNt/jeongsaun.png',
     themeSongTitle: 'Melting',
-    themeSongId: '18YKR5ex6okJRpiim5CZAa-3n5fyWOQrJ',
+    themeSongBase64: './Melting.mp3',
     sigColor: '#030534',
     symbol: 'Silver snake',
     systemInstruction: `
@@ -118,7 +118,7 @@ export const CHARACTERS: Character[] = [
     ],
     imagePlaceholder: 'https://i.postimg.cc/KYsDLfz6/1.png',
     themeSongTitle: '빛의 찬가',
-    themeSongId: '12c2Z5Fi2f5DxEqSm816lDga3NkGT_RGr',
+    themeSongBase64: './빛의 찬가.mp3',
     sigColor: '#E4DCC9',
     symbol: 'Gyrfalcon',
     systemInstruction: `
@@ -152,7 +152,7 @@ export const CHARACTERS: Character[] = [
     ],
     imagePlaceholder: 'https://i.postimg.cc/SsMC9pHn/5.png',
     themeSongTitle: 'Still never cry',
-    themeSongId: '1_QG3zbRxO_XkszwQBozw-K52s3Jnde2Y',
+    themeSongBase64: './Still never cry.mp3',
     sigColor: '#0B0C10',
     symbol: 'Black lion',
     systemInstruction: `
@@ -185,6 +185,8 @@ export const CHARACTERS: Character[] = [
       '평정심 유지',
     ],
     imagePlaceholder: 'https://i.postimg.cc/YqkYvZRz/jemog-eul-iblyeoghaejuseyo-(2).png',
+    themeSongTitle: 'Unknown Strategy',
+    themeSongBase64: './Unknown Strategy.mp3',
     systemInstruction: `
       ${COMMON_SYSTEM_INSTRUCTION}
       당신의 이름은 송단우입니다. 전투본부장입니다.
@@ -213,7 +215,9 @@ export const CHARACTERS: Character[] = [
       '연애 안함 (귀찮음)',
       '머릿속으로 항상 연산 중',
     ],
-    imagePlaceholder: 'https://picsum.photos/400/605?grayscale&blur=2', // No image provided
+    imagePlaceholder: 'https://picsum.photos/400/605?grayscale&blur=2',
+    themeSongTitle: 'Digital Silence',
+    themeSongBase64: './Digital Silence.mp3',
     systemInstruction: `
       ${COMMON_SYSTEM_INSTRUCTION}
       당신의 이름은 필도섭입니다. 데이터본부장입니다.
