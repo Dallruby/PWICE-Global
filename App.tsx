@@ -34,45 +34,47 @@ const CharacterMusicPlayer = ({ audioSrc, title, characterName }: { audioSrc?: s
   const [isPlaying, setIsPlaying] = useState(false);
   const [isError, setIsError] = useState(false);
 
-  // Force reload when src changes to reset error state
   useEffect(() => {
+    // Reset state when source changes
     setIsError(false);
     setIsPlaying(false);
-    // Note: Do not auto-load here to save bandwidth
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
   }, [audioSrc]);
 
-  const togglePlay = () => {
-    if (!audioRef.current || !audioSrc) return;
+  const togglePlay = async () => {
+    const audio = audioRef.current;
+    if (!audio || !audioSrc) return;
 
-    if (isPlaying) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      // If was in error state or hasn't loaded, force a load call now
-      if (isError || audioRef.current.networkState === 0 || audioRef.current.networkState === 3) {
-          audioRef.current.load();
-          setIsError(false);
+    try {
+      if (isPlaying) {
+        audio.pause();
+      } else {
+        setIsError(false);
+        // Ensure audio is ready to play
+        if (audio.readyState === 0) {
+            audio.load();
+        }
+        await audio.play();
       }
+    } catch (error: any) {
+      console.error("Playback failed:", error);
+      // Ignore abort errors (usually from quick pause/play or unmounting)
+      if (error.name === 'AbortError') return;
       
-      const playPromise = audioRef.current.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            setIsPlaying(true);
-            setIsError(false);
-          })
-          .catch(error => {
-            console.error("Playback failed:", error);
-            setIsError(true);
-            setIsPlaying(false);
-          });
-      }
+      setIsError(true);
+      setIsPlaying(false);
     }
   };
 
   const handleAudioError = () => {
-      setIsError(true);
-      setIsPlaying(false);
+      // Only show error if we have a source and it failed
+      if (audioSrc) {
+        setIsError(true);
+        setIsPlaying(false);
+      }
   };
 
   return (
@@ -86,10 +88,11 @@ const CharacterMusicPlayer = ({ audioSrc, title, characterName }: { audioSrc?: s
              ref={audioRef} 
              src={audioSrc} 
              onEnded={() => setIsPlaying(false)}
+             onPause={() => setIsPlaying(false)}
+             onPlay={() => setIsPlaying(true)}
              onError={handleAudioError}
              loop
              preload="none"
-             crossOrigin="anonymous"
            />
          )}
          
@@ -110,7 +113,7 @@ const CharacterMusicPlayer = ({ audioSrc, title, characterName }: { audioSrc?: s
             
             <div className="flex-1 min-w-0">
               <p className={`text-[10px] font-bold tracking-widest uppercase mb-0.5 ${isError ? 'text-red-500' : 'text-purple-400'}`}>
-                  {audioSrc ? (isError ? 'Connection Failed (Retry)' : (isPlaying ? 'Now Playing' : 'Original Soundtrack')) : 'No Audio Source'}
+                  {audioSrc ? (isError ? 'Playback Failed' : (isPlaying ? 'Now Playing' : 'Original Soundtrack')) : 'No Audio Source'}
               </p>
               <div className="overflow-hidden">
                  <p className={`text-sm text-white font-display truncate ${isPlaying ? 'animate-pulse' : ''}`}>
@@ -137,11 +140,11 @@ const CharacterMusicPlayer = ({ audioSrc, title, characterName }: { audioSrc?: s
          </div>
       </div>
       
-      {/* Explicit Error Message for Google Drive Permissions */}
+      {/* Explicit Error Message */}
       {isError && (
         <div className="text-[10px] text-red-400 bg-red-950/20 p-2 border border-red-900/30 mt-1 flex items-start gap-2">
            <span className="font-bold">⚠ ERROR:</span>
-           <span>구글 드라이브 권한을 확인해주세요. 파일이 '링크가 있는 모든 사용자에게 공개(Anyone with the link)' 상태여야 재생 가능합니다.</span>
+           <span>오디오 파일을 재생할 수 없습니다. 잠시 후 다시 시도해주세요.</span>
         </div>
       )}
     </div>
@@ -427,6 +430,7 @@ export default function App() {
               
               {/* Standalone Music Player */}
               <CharacterMusicPlayer 
+                 key={selectedChar.id} 
                  audioSrc={selectedChar.themeSongUrl} 
                  title={selectedChar.themeSongTitle} 
                  characterName={selectedChar.name}
