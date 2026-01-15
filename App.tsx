@@ -36,12 +36,10 @@ const CharacterMusicPlayer = ({ audioSrc, title, characterName }: { audioSrc?: s
 
   useEffect(() => {
     // Reset state when source changes
+    // Since parent uses key={char.id}, this component remounts cleanly on character change.
+    // We do NOT call .load() here to avoid interrupting the browser's native initial fetch triggered by <audio src="...">
     setIsError(false);
     setIsPlaying(false);
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
   }, [audioSrc]);
 
   const togglePlay = async () => {
@@ -53,24 +51,30 @@ const CharacterMusicPlayer = ({ audioSrc, title, characterName }: { audioSrc?: s
         audio.pause();
       } else {
         setIsError(false);
-        // Ensure audio is ready to play
+        // Force load only if the audio element is completely uninitialized
         if (audio.readyState === 0) {
             audio.load();
         }
         await audio.play();
       }
     } catch (error: any) {
-      console.error("Playback failed:", error);
-      // Ignore abort errors (usually from quick pause/play or unmounting)
+      // AbortError is common when toggling play/pause quickly or if load is interrupted
       if (error.name === 'AbortError') return;
       
+      console.error("Playback failed message:", error.message);
       setIsError(true);
       setIsPlaying(false);
     }
   };
 
   const handleAudioError = () => {
-      // Only show error if we have a source and it failed
+      // FIX: Do not log the event object directly. It causes "Converting circular structure to JSON" errors.
+      if (audioRef.current && audioRef.current.error) {
+        console.error("Audio Error:", audioRef.current.error.code, audioRef.current.error.message);
+      } else {
+        console.error("Unknown Audio Error occurred");
+      }
+      
       if (audioSrc) {
         setIsError(true);
         setIsPlaying(false);
@@ -92,7 +96,7 @@ const CharacterMusicPlayer = ({ audioSrc, title, characterName }: { audioSrc?: s
              onPlay={() => setIsPlaying(true)}
              onError={handleAudioError}
              loop
-             preload="none"
+             preload="auto"
            />
          )}
          
@@ -184,6 +188,15 @@ export default function App() {
   useEffect(() => {
     scrollToBottom();
   }, [messages, isTyping]);
+
+  // Force scroll to top whenever the view or character changes
+  useEffect(() => {
+    // Use setTimeout to ensure this runs after the layout shift/paint
+    const timer = setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [currentView, selectedChar]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
