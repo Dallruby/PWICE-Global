@@ -21,7 +21,7 @@ export interface Character {
   imagePlaceholder: string; // URL for placeholder
   systemInstruction: string; // For AI context
   themeSongTitle?: string; // Theme song title
-  themeSongBase64?: string; // Direct Base64 Audio Data
+  themeSongUrl?: string; // Audio Source URL (Direct Link)
   sigColor?: string; // Signature Hex Color
   symbol?: string; // Signature Symbol
 }

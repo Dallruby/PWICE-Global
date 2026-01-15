@@ -32,93 +32,118 @@ const AlertIcon = () => (
 const CharacterMusicPlayer = ({ audioSrc, title, characterName }: { audioSrc?: string, title?: string, characterName: string }) => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [hasError, setHasError] = useState(false);
-  
-  const isAvailable = !!audioSrc && audioSrc.length > 0 && !hasError;
+  const [isError, setIsError] = useState(false);
 
+  // Force reload when src changes to reset error state
   useEffect(() => {
-    setHasError(false);
+    setIsError(false);
     setIsPlaying(false);
-    if (audioSrc && audioRef.current) {
-        audioRef.current.load();
-    }
+    // Note: Do not auto-load here to save bandwidth
   }, [audioSrc]);
 
   const togglePlay = () => {
-    if (!audioRef.current || !isAvailable) return;
+    if (!audioRef.current || !audioSrc) return;
 
     if (isPlaying) {
       audioRef.current.pause();
+      setIsPlaying(false);
     } else {
+      // If was in error state or hasn't loaded, force a load call now
+      if (isError || audioRef.current.networkState === 0 || audioRef.current.networkState === 3) {
+          audioRef.current.load();
+          setIsError(false);
+      }
+      
       const playPromise = audioRef.current.play();
       if (playPromise !== undefined) {
-        playPromise.catch(error => {
-          console.error("Playback failed:", error);
-          setHasError(true);
-          setIsPlaying(false);
-        });
+        playPromise
+          .then(() => {
+            setIsPlaying(true);
+            setIsError(false);
+          })
+          .catch(error => {
+            console.error("Playback failed:", error);
+            setIsError(true);
+            setIsPlaying(false);
+          });
       }
     }
-    setIsPlaying(!isPlaying);
+  };
+
+  const handleAudioError = () => {
+      setIsError(true);
+      setIsPlaying(false);
   };
 
   return (
-    <div className="w-full bg-slate-900 border border-slate-800 p-4 mb-4 flex items-center justify-between shadow-lg relative overflow-hidden group">
-       {/* Background Pulsing Effect when playing */}
-       <div className={`absolute inset-0 bg-purple-900/10 transition-opacity duration-1000 ${isPlaying ? 'opacity-100 animate-pulse' : 'opacity-0'}`} />
-       
-       {audioSrc && (
-         <audio 
-           ref={audioRef} 
-           src={audioSrc} 
-           onEnded={() => setIsPlaying(false)}
-           onError={() => {
-             setHasError(true);
-             setIsPlaying(false);
-           }}
-           loop
-         />
-       )}
-       
-       <div className="flex items-center gap-4 z-10 w-full">
-          <button 
-            onClick={togglePlay}
-            className={`w-10 h-10 flex-shrink-0 flex items-center justify-center border rounded-full transition-all ${
-                isAvailable 
-                ? 'bg-purple-900/50 text-white border-purple-500 hover:bg-purple-600 hover:shadow-[0_0_15px_rgba(168,85,247,0.5)]' 
-                : 'bg-red-900/20 text-red-500 border-red-900/50 cursor-not-allowed'
-            }`}
-          >
-            {isAvailable ? (isPlaying ? <PauseIcon /> : <PlayIcon />) : <AlertIcon />}
-          </button>
-          
-          <div className="flex-1 min-w-0">
-            <p className={`text-[10px] font-bold tracking-widest uppercase mb-0.5 ${isAvailable ? 'text-purple-400' : 'text-red-500'}`}>
-                {isAvailable ? (isPlaying ? 'Now Playing' : 'Original Soundtrack') : 'Audio Unavailable'}
-            </p>
-            <div className="overflow-hidden">
-               <p className={`text-sm text-white font-display italic truncate ${isPlaying ? 'animate-pulse' : ''}`}>
-                 {title ? `${title} - 패도 OST (${characterName})` : 'Unknown Track'}
-               </p>
+    <div className="w-full mb-4">
+      <div className="w-full bg-slate-900 border border-slate-800 p-4 flex items-center justify-between shadow-lg relative overflow-hidden group">
+         {/* Background Pulsing Effect when playing */}
+         <div className={`absolute inset-0 bg-purple-900/10 transition-opacity duration-1000 ${isPlaying ? 'opacity-100 animate-pulse' : 'opacity-0'}`} />
+         
+         {audioSrc && (
+           <audio 
+             ref={audioRef} 
+             src={audioSrc} 
+             onEnded={() => setIsPlaying(false)}
+             onError={handleAudioError}
+             loop
+             preload="none"
+             crossOrigin="anonymous"
+           />
+         )}
+         
+         <div className="flex items-center gap-4 z-10 w-full">
+            <button 
+              onClick={togglePlay}
+              disabled={!audioSrc}
+              className={`w-10 h-10 flex-shrink-0 flex items-center justify-center border rounded-full transition-all ${
+                  audioSrc 
+                  ? (isError 
+                      ? 'bg-red-900/20 text-red-500 border-red-900/50 hover:bg-red-900/40 hover:text-red-400'
+                      : 'bg-purple-900/50 text-white border-purple-500 hover:bg-purple-600 hover:shadow-[0_0_15px_rgba(168,85,247,0.5)]')
+                  : 'bg-slate-800 text-slate-600 border-slate-700 cursor-not-allowed'
+              }`}
+            >
+              {audioSrc ? (isError ? <AlertIcon /> : (isPlaying ? <PauseIcon /> : <PlayIcon />)) : <AlertIcon />}
+            </button>
+            
+            <div className="flex-1 min-w-0">
+              <p className={`text-[10px] font-bold tracking-widest uppercase mb-0.5 ${isError ? 'text-red-500' : 'text-purple-400'}`}>
+                  {audioSrc ? (isError ? 'Connection Failed (Retry)' : (isPlaying ? 'Now Playing' : 'Original Soundtrack')) : 'No Audio Source'}
+              </p>
+              <div className="overflow-hidden">
+                 <p className={`text-sm text-white font-display truncate ${isPlaying ? 'animate-pulse' : ''}`}>
+                   {title ? `${title} - 패도 OST (${characterName})` : 'Unknown Track'}
+                 </p>
+              </div>
             </div>
-          </div>
 
-          {/* Mini Visualizer */}
-          {isAvailable && (
-             <div className="flex items-end gap-1 h-6">
-                {[...Array(5)].map((_, i) => (
-                  <div 
-                    key={i} 
-                    className={`w-1 rounded-t-sm transition-all duration-75 ${isPlaying ? 'bg-purple-500' : 'bg-slate-700'}`}
-                    style={{ 
-                       height: isPlaying ? `${Math.random() * 100}%` : '4px',
-                       animation: isPlaying ? `bounce ${0.3 + i * 0.1}s infinite alternate` : 'none',
-                    }}
-                  />
-                ))}
-             </div>
-          )}
-       </div>
+            {/* Mini Visualizer */}
+            {!isError && audioSrc && (
+               <div className="flex items-end gap-1 h-6">
+                  {[...Array(5)].map((_, i) => (
+                    <div 
+                      key={i} 
+                      className={`w-1 rounded-t-sm transition-all duration-75 ${isPlaying ? 'bg-purple-500' : 'bg-slate-700'}`}
+                      style={{ 
+                         height: isPlaying ? `${Math.random() * 100}%` : '4px',
+                         animation: isPlaying ? `bounce ${0.3 + i * 0.1}s infinite alternate` : 'none',
+                      }}
+                    />
+                  ))}
+               </div>
+            )}
+         </div>
+      </div>
+      
+      {/* Explicit Error Message for Google Drive Permissions */}
+      {isError && (
+        <div className="text-[10px] text-red-400 bg-red-950/20 p-2 border border-red-900/30 mt-1 flex items-start gap-2">
+           <span className="font-bold">⚠ ERROR:</span>
+           <span>구글 드라이브 권한을 확인해주세요. 파일이 '링크가 있는 모든 사용자에게 공개(Anyone with the link)' 상태여야 재생 가능합니다.</span>
+        </div>
+      )}
     </div>
   );
 };
@@ -402,7 +427,7 @@ export default function App() {
               
               {/* Standalone Music Player */}
               <CharacterMusicPlayer 
-                 audioSrc={selectedChar.themeSongBase64} 
+                 audioSrc={selectedChar.themeSongUrl} 
                  title={selectedChar.themeSongTitle} 
                  characterName={selectedChar.name}
               />
@@ -534,7 +559,7 @@ export default function App() {
               <div className="text-white mb-1">⋯𝙲𝙰𝙻𝙻⋯</div>
               {watchData?.calls.map((call, i) => (
                 <div key={i} className="flex gap-2">
-                  <span className={call.type === 'incoming' ? 'text-green-400' : 'text-blue-400'}>
+                  <span className="text-green-400">
                     {call.type === 'incoming' ? '☏↙' : '☏↗'}
                   </span>
                   <span className="text-slate-400">║</span>
