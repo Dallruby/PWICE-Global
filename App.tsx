@@ -28,13 +28,12 @@ const AlertIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
 );
 
-// --- Overlay Audio Player Component ---
-const OverlayAudioPlayer = ({ audioSrc, title }: { audioSrc?: string, title?: string }) => {
+// --- Standalone Music Player Component ---
+const CharacterMusicPlayer = ({ audioSrc, title, characterName }: { audioSrc?: string, title?: string, characterName: string }) => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasError, setHasError] = useState(false);
   
-  // Audio is considered present if provided, unless an error occurs
   const isAvailable = !!audioSrc && audioSrc.length > 0 && !hasError;
 
   useEffect(() => {
@@ -45,9 +44,7 @@ const OverlayAudioPlayer = ({ audioSrc, title }: { audioSrc?: string, title?: st
     }
   }, [audioSrc]);
 
-  const togglePlay = (e: React.MouseEvent) => {
-    e.stopPropagation(); 
-    
+  const togglePlay = () => {
     if (!audioRef.current || !isAvailable) return;
 
     if (isPlaying) {
@@ -56,7 +53,7 @@ const OverlayAudioPlayer = ({ audioSrc, title }: { audioSrc?: string, title?: st
       const playPromise = audioRef.current.play();
       if (playPromise !== undefined) {
         playPromise.catch(error => {
-          console.error("Playback failed (likely missing file):", error);
+          console.error("Playback failed:", error);
           setHasError(true);
           setIsPlaying(false);
         });
@@ -66,7 +63,10 @@ const OverlayAudioPlayer = ({ audioSrc, title }: { audioSrc?: string, title?: st
   };
 
   return (
-    <div className="absolute inset-0 flex flex-col justify-end pointer-events-none z-20">
+    <div className="w-full bg-slate-900 border border-slate-800 p-4 mb-4 flex items-center justify-between shadow-lg relative overflow-hidden group">
+       {/* Background Pulsing Effect when playing */}
+       <div className={`absolute inset-0 bg-purple-900/10 transition-opacity duration-1000 ${isPlaying ? 'opacity-100 animate-pulse' : 'opacity-0'}`} />
+       
        {audioSrc && (
          <audio 
            ref={audioRef} 
@@ -80,52 +80,44 @@ const OverlayAudioPlayer = ({ audioSrc, title }: { audioSrc?: string, title?: st
          />
        )}
        
-       {/* Gradient Overlay for controls */}
-       <div className="w-full bg-gradient-to-t from-black via-black/90 to-transparent pt-24 pb-6 px-6 flex items-end justify-between pointer-events-auto transition-opacity duration-300">
+       <div className="flex items-center gap-4 z-10 w-full">
+          <button 
+            onClick={togglePlay}
+            className={`w-10 h-10 flex-shrink-0 flex items-center justify-center border rounded-full transition-all ${
+                isAvailable 
+                ? 'bg-purple-900/50 text-white border-purple-500 hover:bg-purple-600 hover:shadow-[0_0_15px_rgba(168,85,247,0.5)]' 
+                : 'bg-red-900/20 text-red-500 border-red-900/50 cursor-not-allowed'
+            }`}
+          >
+            {isAvailable ? (isPlaying ? <PauseIcon /> : <PlayIcon />) : <AlertIcon />}
+          </button>
           
-          <div className="flex items-center gap-4">
-             <button 
-                onClick={togglePlay}
-                className={`w-12 h-12 flex items-center justify-center backdrop-blur-md border rounded-full transition-all group ${
-                    isAvailable 
-                    ? 'bg-purple-900/30 text-white border-purple-500/50 hover:bg-purple-600 hover:border-purple-500 hover:shadow-[0_0_20px_rgba(147,51,234,0.6)]' 
-                    : 'bg-red-900/20 text-red-500 border-red-900/50 cursor-not-allowed hover:bg-red-900/40'
-                }`}
-             >
-                {isAvailable ? (isPlaying ? <PauseIcon /> : <PlayIcon />) : <AlertIcon />}
-             </button>
-             
-             <div>
-                <p className={`text-[10px] font-bold tracking-widest uppercase mb-0.5 ${isAvailable ? 'text-purple-400' : 'text-red-500'}`}>
-                    {isAvailable ? (isPlaying ? 'Now Playing' : 'Ready') : 'File Not Found'}
-                </p>
-                <p className="text-white font-display italic text-lg leading-none opacity-90 drop-shadow-lg">
-                    {title || 'Unknown Track'}
-                </p>
+          <div className="flex-1 min-w-0">
+            <p className={`text-[10px] font-bold tracking-widest uppercase mb-0.5 ${isAvailable ? 'text-purple-400' : 'text-red-500'}`}>
+                {isAvailable ? (isPlaying ? 'Now Playing' : 'Original Soundtrack') : 'Audio Unavailable'}
+            </p>
+            <div className="overflow-hidden">
+               <p className={`text-sm text-white font-display italic truncate ${isPlaying ? 'animate-pulse' : ''}`}>
+                 {title ? `${title} - 패도 OST (${characterName})` : 'Unknown Track'}
+               </p>
+            </div>
+          </div>
+
+          {/* Mini Visualizer */}
+          {isAvailable && (
+             <div className="flex items-end gap-1 h-6">
+                {[...Array(5)].map((_, i) => (
+                  <div 
+                    key={i} 
+                    className={`w-1 rounded-t-sm transition-all duration-75 ${isPlaying ? 'bg-purple-500' : 'bg-slate-700'}`}
+                    style={{ 
+                       height: isPlaying ? `${Math.random() * 100}%` : '4px',
+                       animation: isPlaying ? `bounce ${0.3 + i * 0.1}s infinite alternate` : 'none',
+                    }}
+                  />
+                ))}
              </div>
-          </div>
-
-          {/* Visualizer Animation */}
-          <div className="flex items-end gap-1 h-10 opacity-90">
-            {[...Array(6)].map((_, i) => (
-              <div 
-                key={i} 
-                className={`w-1.5 rounded-t-sm transition-all duration-75 shadow-[0_0_10px_#a855f7] ${isPlaying ? 'bg-purple-400' : 'bg-slate-800'}`}
-                style={{ 
-                   height: isPlaying ? `${20 + Math.random() * 80}%` : '4px',
-                   animation: isPlaying ? `bounce ${0.4 + i * 0.1}s infinite alternate` : 'none',
-                   animationDelay: `-${i * 0.15}s`
-                }}
-              />
-            ))}
-          </div>
-
-          <style>{`
-            @keyframes bounce {
-              0% { height: 15%; opacity: 0.6; }
-              100% { height: 100%; opacity: 1; filter: brightness(1.2); }
-            }
-          `}</style>
+          )}
        </div>
     </div>
   );
@@ -407,15 +399,16 @@ export default function App() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             <div className="flex flex-col gap-8">
-              {/* Character Image & Overlay Player */}
+              
+              {/* Standalone Music Player */}
+              <CharacterMusicPlayer 
+                 audioSrc={selectedChar.themeSongBase64} 
+                 title={selectedChar.themeSongTitle} 
+                 characterName={selectedChar.name}
+              />
+
               <div className="relative aspect-square w-full bg-slate-900 overflow-hidden border border-slate-800 group">
                 <img src={selectedChar.imagePlaceholder} alt={selectedChar.name} className="w-full h-full object-cover" />
-                
-                {/* Overlay Audio Player - Always present */}
-                <OverlayAudioPlayer 
-                   audioSrc={selectedChar.themeSongBase64} 
-                   title={selectedChar.themeSongTitle} 
-                />
               </div>
               
               <div className="bg-slate-900/50 p-6 border border-slate-800">
@@ -493,12 +486,15 @@ export default function App() {
                </div>
 
                <div className="pt-8 mt-auto">
-                 <button 
-                  onClick={startChat}
-                  className="w-full bg-purple-900/20 hover:bg-purple-900/40 text-purple-400 border border-purple-900/50 py-4 px-8 uppercase tracking-[0.2em] transition-all hover:scale-[1.02] flex items-center justify-center gap-3 font-bold mb-6 font-mono"
-                 >
-                   <WatchIcon /> ACCESS SAIF WATCH
-                 </button>
+                 <div className="relative group">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg blur opacity-40 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-pulse"></div>
+                    <button 
+                      onClick={startChat}
+                      className="relative w-full bg-black text-purple-400 border border-purple-500/50 py-4 px-8 uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 font-bold font-mono hover:text-white"
+                    >
+                      <WatchIcon /> ACCESS SAIF WATCH
+                    </button>
+                 </div>
 
                  <p className="mt-4 text-xs text-center text-slate-600 font-mono">
                    * Caution: Conversations are monitored by the SAIF Watch network.
