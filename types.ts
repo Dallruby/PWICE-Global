@@ -35,7 +35,16 @@ export interface ChatMessage {
 
 export enum AppView {
   LOGIN = 'LOGIN',
-  HOME = 'HOME',
+  DASHBOARD = 'DASHBOARD',
+  ARCHIVE = 'ARCHIVE',
+  CHARACTER_LIST = 'CHARACTER_LIST',
   CHARACTER_DETAIL = 'CHARACTER_DETAIL',
   CHAT = 'CHAT',
+}
+
+export interface ArchiveContent {
+  id: string;
+  title: string;
+  subtitle: string;
+  content: string; // Markdown supported
 }
