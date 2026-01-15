@@ -33,13 +33,13 @@ const CharacterMusicPlayer = ({ audioSrc, title, characterName }: { audioSrc?: s
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     // Reset state when source changes
-    // Since parent uses key={char.id}, this component remounts cleanly on character change.
-    // We do NOT call .load() here to avoid interrupting the browser's native initial fetch triggered by <audio src="...">
     setIsError(false);
     setIsPlaying(false);
+    setIsLoading(false);
   }, [audioSrc]);
 
   const togglePlay = async () => {
@@ -51,13 +51,19 @@ const CharacterMusicPlayer = ({ audioSrc, title, characterName }: { audioSrc?: s
         audio.pause();
       } else {
         setIsError(false);
-        // Force load only if the audio element is completely uninitialized
+        setIsLoading(true);
+        
+        // Ensure audio is loaded before playing
+        // IMPORTANT: preload="none" means we MUST call load() explicitly if it's the first time
         if (audio.readyState === 0) {
             audio.load();
         }
+        
         await audio.play();
+        setIsLoading(false);
       }
     } catch (error: any) {
+      setIsLoading(false);
       // AbortError is common when toggling play/pause quickly or if load is interrupted
       if (error.name === 'AbortError') return;
       
@@ -78,6 +84,7 @@ const CharacterMusicPlayer = ({ audioSrc, title, characterName }: { audioSrc?: s
       if (audioSrc) {
         setIsError(true);
         setIsPlaying(false);
+        setIsLoading(false);
       }
   };
 
@@ -94,16 +101,20 @@ const CharacterMusicPlayer = ({ audioSrc, title, characterName }: { audioSrc?: s
              onEnded={() => setIsPlaying(false)}
              onPause={() => setIsPlaying(false)}
              onPlay={() => setIsPlaying(true)}
+             onWaiting={() => setIsLoading(true)}
+             onPlaying={() => setIsLoading(false)}
              onError={handleAudioError}
              loop
-             preload="auto"
+             playsInline
+             webkit-playsinline="true"
+             preload="none" 
            />
          )}
          
          <div className="flex items-center gap-4 z-10 w-full">
             <button 
               onClick={togglePlay}
-              disabled={!audioSrc}
+              disabled={!audioSrc || isLoading}
               className={`w-10 h-10 flex-shrink-0 flex items-center justify-center border rounded-full transition-all ${
                   audioSrc 
                   ? (isError 
@@ -112,12 +123,16 @@ const CharacterMusicPlayer = ({ audioSrc, title, characterName }: { audioSrc?: s
                   : 'bg-slate-800 text-slate-600 border-slate-700 cursor-not-allowed'
               }`}
             >
-              {audioSrc ? (isError ? <AlertIcon /> : (isPlaying ? <PauseIcon /> : <PlayIcon />)) : <AlertIcon />}
+              {isLoading ? (
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                audioSrc ? (isError ? <AlertIcon /> : (isPlaying ? <PauseIcon /> : <PlayIcon />)) : <AlertIcon />
+              )}
             </button>
             
             <div className="flex-1 min-w-0">
               <p className={`text-[10px] font-bold tracking-widest uppercase mb-0.5 ${isError ? 'text-red-500' : 'text-purple-400'}`}>
-                  {audioSrc ? (isError ? 'Playback Failed' : (isPlaying ? 'Now Playing' : 'Original Soundtrack')) : 'No Audio Source'}
+                  {audioSrc ? (isError ? 'Playback Failed' : (isLoading ? 'Buffering...' : (isPlaying ? 'Now Playing' : 'Original Soundtrack'))) : 'No Audio Source'}
               </p>
               <div className="overflow-hidden">
                  <p className={`text-sm text-white font-display truncate ${isPlaying ? 'animate-pulse' : ''}`}>
@@ -127,7 +142,7 @@ const CharacterMusicPlayer = ({ audioSrc, title, characterName }: { audioSrc?: s
             </div>
 
             {/* Mini Visualizer */}
-            {!isError && audioSrc && (
+            {!isError && audioSrc && !isLoading && (
                <div className="flex items-end gap-1 h-6">
                   {[...Array(5)].map((_, i) => (
                     <div 
@@ -148,7 +163,7 @@ const CharacterMusicPlayer = ({ audioSrc, title, characterName }: { audioSrc?: s
       {isError && (
         <div className="text-[10px] text-red-400 bg-red-950/20 p-2 border border-red-900/30 mt-1 flex items-start gap-2">
            <span className="font-bold">⚠ ERROR:</span>
-           <span>오디오 파일을 재생할 수 없습니다. 잠시 후 다시 시도해주세요.</span>
+           <span>재생할 수 없습니다. 네트워크 연결을 확인하거나 나중에 시도하세요.</span>
         </div>
       )}
     </div>
@@ -188,6 +203,13 @@ export default function App() {
   useEffect(() => {
     scrollToBottom();
   }, [messages, isTyping]);
+
+  // Disable browser scroll restoration to ensure scrollTo(0,0) works reliably on mobile
+  useEffect(() => {
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+  }, []);
 
   // Force scroll to top whenever the view or character changes
   useEffect(() => {

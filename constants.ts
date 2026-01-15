@@ -48,7 +48,7 @@ export const CHARACTERS: Character[] = [
     ],
     imagePlaceholder: 'https://i.postimg.cc/3Rcm4xtP/001.png',
     themeSongTitle: 'Only the strong',
-    themeSongUrl: 'https://files.catbox.moe/iw8eu4.mp3', 
+    themeSongUrl: 'https://cdn.jsdelivr.net/gh/Dallruby/PWICE-Global@main/public/music/Only%20the%20strong.mp3', 
     sigColor: '#000000',
     symbol: 'Black Tiger',
     systemInstruction: `
@@ -84,7 +84,7 @@ export const CHARACTERS: Character[] = [
     ],
     imagePlaceholder: 'https://i.postimg.cc/7YvXmKNt/jeongsaun.png',
     themeSongTitle: 'Melting',
-    themeSongUrl: 'https://files.catbox.moe/0touje.mp3',
+    themeSongUrl: 'https://cdn.jsdelivr.net/gh/Dallruby/PWICE-Global@main/public/music/Melting.mp3',
     sigColor: '#030534',
     symbol: 'Silver snake',
     systemInstruction: `
@@ -118,7 +118,7 @@ export const CHARACTERS: Character[] = [
     ],
     imagePlaceholder: 'https://i.postimg.cc/KYsDLfz6/1.png',
     themeSongTitle: '빛의 찬가',
-    themeSongUrl: 'https://files.catbox.moe/6x9ga1.mp3',
+    themeSongUrl: 'https://cdn.jsdelivr.net/gh/Dallruby/PWICE-Global@main/public/music/Hymn%20of%20light.mp3',
     sigColor: '#E4DCC9',
     symbol: 'Gyrfalcon',
     systemInstruction: `
@@ -152,7 +152,7 @@ export const CHARACTERS: Character[] = [
     ],
     imagePlaceholder: 'https://i.postimg.cc/SsMC9pHn/5.png',
     themeSongTitle: 'Still never cry',
-    themeSongUrl: 'https://files.catbox.moe/t1xbu7.mp3',
+    themeSongUrl: 'https://cdn.jsdelivr.net/gh/Dallruby/PWICE-Global@main/public/music/Still%20never%20cry.mp3',
     sigColor: '#0B0C10',
     symbol: 'Black lion',
     systemInstruction: `
@@ -186,7 +186,7 @@ export const CHARACTERS: Character[] = [
     ],
     imagePlaceholder: 'https://i.postimg.cc/YqkYvZRz/jemog-eul-iblyeoghaejuseyo-(2).png',
     themeSongTitle: 'Love you recklessly',
-    themeSongUrl: 'https://files.catbox.moe/f8g2sm.mp3',
+    themeSongUrl: 'https://cdn.jsdelivr.net/gh/Dallruby/PWICE-Global@main/public/music/Love%20you%20recklessly.mp3',
     systemInstruction: `
       ${COMMON_SYSTEM_INSTRUCTION}
       당신의 이름은 송단우입니다. 전투본부장입니다.
