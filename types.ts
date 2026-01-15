@@ -21,7 +21,7 @@ export interface Character {
   imagePlaceholder: string; // URL for placeholder
   systemInstruction: string; // For AI context
   themeSongTitle?: string; // Theme song title
-  themeSongId?: string; // Google Drive File ID for iframe
+  themeSongBase64?: string; // Direct Base64 Audio Data
   sigColor?: string; // Signature Hex Color
   symbol?: string; // Signature Symbol
 }

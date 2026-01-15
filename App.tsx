@@ -12,15 +12,124 @@ const BackIcon = () => (
 const SendIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" x2="11" y1="2" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
 );
-const MusicIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-);
 const WatchIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="7"/><polyline points="12 9 12 12 13.5 13.5"/><path d="M16.51 17.35l-.35 3.83a2 2 0 0 1-2 1.82H9.83a2 2 0 0 1-2-1.82l-.35-3.83m.01-10.7l.35-3.83A2 2 0 0 1 9.83 1h4.35a2 2 0 0 1 2 1.82l.35 3.83"/></svg>
 );
 const LockIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
 );
+const PlayIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M8 5v14l11-7z"/></svg>
+);
+const PauseIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+);
+const AlertIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+);
+
+// --- Overlay Audio Player Component ---
+const OverlayAudioPlayer = ({ audioSrc, title }: { audioSrc?: string, title?: string }) => {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  
+  // Audio is considered present if provided, unless an error occurs
+  const isAvailable = !!audioSrc && audioSrc.length > 0 && !hasError;
+
+  useEffect(() => {
+    setHasError(false);
+    setIsPlaying(false);
+    if (audioSrc && audioRef.current) {
+        audioRef.current.load();
+    }
+  }, [audioSrc]);
+
+  const togglePlay = (e: React.MouseEvent) => {
+    e.stopPropagation(); 
+    
+    if (!audioRef.current || !isAvailable) return;
+
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          console.error("Playback failed (likely missing file):", error);
+          setHasError(true);
+          setIsPlaying(false);
+        });
+      }
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  return (
+    <div className="absolute inset-0 flex flex-col justify-end pointer-events-none z-20">
+       {audioSrc && (
+         <audio 
+           ref={audioRef} 
+           src={audioSrc} 
+           onEnded={() => setIsPlaying(false)}
+           onError={() => {
+             setHasError(true);
+             setIsPlaying(false);
+           }}
+           loop
+         />
+       )}
+       
+       {/* Gradient Overlay for controls */}
+       <div className="w-full bg-gradient-to-t from-black via-black/90 to-transparent pt-24 pb-6 px-6 flex items-end justify-between pointer-events-auto transition-opacity duration-300">
+          
+          <div className="flex items-center gap-4">
+             <button 
+                onClick={togglePlay}
+                className={`w-12 h-12 flex items-center justify-center backdrop-blur-md border rounded-full transition-all group ${
+                    isAvailable 
+                    ? 'bg-purple-900/30 text-white border-purple-500/50 hover:bg-purple-600 hover:border-purple-500 hover:shadow-[0_0_20px_rgba(147,51,234,0.6)]' 
+                    : 'bg-red-900/20 text-red-500 border-red-900/50 cursor-not-allowed hover:bg-red-900/40'
+                }`}
+             >
+                {isAvailable ? (isPlaying ? <PauseIcon /> : <PlayIcon />) : <AlertIcon />}
+             </button>
+             
+             <div>
+                <p className={`text-[10px] font-bold tracking-widest uppercase mb-0.5 ${isAvailable ? 'text-purple-400' : 'text-red-500'}`}>
+                    {isAvailable ? (isPlaying ? 'Now Playing' : 'Ready') : 'File Not Found'}
+                </p>
+                <p className="text-white font-display italic text-lg leading-none opacity-90 drop-shadow-lg">
+                    {title || 'Unknown Track'}
+                </p>
+             </div>
+          </div>
+
+          {/* Visualizer Animation */}
+          <div className="flex items-end gap-1 h-10 opacity-90">
+            {[...Array(6)].map((_, i) => (
+              <div 
+                key={i} 
+                className={`w-1.5 rounded-t-sm transition-all duration-75 shadow-[0_0_10px_#a855f7] ${isPlaying ? 'bg-purple-400' : 'bg-slate-800'}`}
+                style={{ 
+                   height: isPlaying ? `${20 + Math.random() * 80}%` : '4px',
+                   animation: isPlaying ? `bounce ${0.4 + i * 0.1}s infinite alternate` : 'none',
+                   animationDelay: `-${i * 0.15}s`
+                }}
+              />
+            ))}
+          </div>
+
+          <style>{`
+            @keyframes bounce {
+              0% { height: 15%; opacity: 0.6; }
+              100% { height: 100%; opacity: 1; filter: brightness(1.2); }
+            }
+          `}</style>
+       </div>
+    </div>
+  );
+};
 
 interface WatchData {
   hr: number;
@@ -298,10 +407,15 @@ export default function App() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             <div className="flex flex-col gap-8">
-              <div className="relative aspect-square w-full bg-slate-900 overflow-hidden border border-slate-800">
-                <img src={selectedChar.imagePlaceholder} alt={selectedChar.name} className="w-full h-full object-cover opacity-80" />
-                <div className="absolute bottom-0 left-0 p-8 bg-gradient-to-t from-black to-transparent w-full">
-                </div>
+              {/* Character Image & Overlay Player */}
+              <div className="relative aspect-square w-full bg-slate-900 overflow-hidden border border-slate-800 group">
+                <img src={selectedChar.imagePlaceholder} alt={selectedChar.name} className="w-full h-full object-cover" />
+                
+                {/* Overlay Audio Player - Always present */}
+                <OverlayAudioPlayer 
+                   audioSrc={selectedChar.themeSongBase64} 
+                   title={selectedChar.themeSongTitle} 
+                />
               </div>
               
               <div className="bg-slate-900/50 p-6 border border-slate-800">
@@ -385,43 +499,6 @@ export default function App() {
                  >
                    <WatchIcon /> ACCESS SAIF WATCH
                  </button>
-
-                 <div className="w-full bg-slate-900 border border-slate-800 p-4 rounded-sm">
-                    <div className="flex items-center gap-4 mb-3">
-                      <div className="w-8 h-8 bg-purple-900/20 flex items-center justify-center rounded-sm text-purple-500">
-                        <MusicIcon />
-                      </div>
-                      <div className="flex-1">
-                        <div className="text-xs text-purple-400 font-bold uppercase tracking-wider mb-1">
-                          패도 OST
-                        </div>
-                        <div className="text-sm text-white font-display">
-                           {selectedChar.themeSongTitle ? `${selectedChar.themeSongTitle} (${selectedChar.name})` : 'No Audio Data'}
-                        </div>
-                      </div>
-                    </div>
-
-                    {selectedChar.themeSongId ? (
-                      <div className="w-full rounded overflow-hidden border border-slate-700 bg-black">
-                         <iframe 
-                           src={`https://drive.google.com/file/d/${selectedChar.themeSongId}/preview`}
-                           width="100%" 
-                           height="100" 
-                           allow="autoplay"
-                           title="Theme Song"
-                           style={{ filter: 'invert(1) hue-rotate(180deg) contrast(0.8)', border: 'none' }}
-                         ></iframe>
-                      </div>
-                    ) : (
-                      <div className="h-20 bg-black border border-slate-800 flex items-center justify-center text-xs text-slate-600 font-mono">
-                        [AUDIO STREAM UNAVAILABLE]
-                      </div>
-                    )}
-
-                    <p className="mt-3 text-[10px] text-slate-500 text-center font-sans">
-                        ※ 재생이 안 될 경우 팝업 차단을 확인해주세요.
-                    </p>
-                 </div>
 
                  <p className="mt-4 text-xs text-center text-slate-600 font-mono">
                    * Caution: Conversations are monitored by the SAIF Watch network.
