@@ -48,7 +48,7 @@ export const CHARACTERS: Character[] = [
     ],
     imagePlaceholder: 'https://i.postimg.cc/3Rcm4xtP/001.png',
     themeSongTitle: 'Only the strong',
-    themeSongBase64: '/music/Only the strong.mp3', 
+    themeSongUrl: 'https://drive.google.com/uc?export=download&confirm=t&id=1WbSjCM94nIgh33_L00qh-IpFjdNonuRw', 
     sigColor: '#000000',
     symbol: 'Black Tiger',
     systemInstruction: `
@@ -84,7 +84,7 @@ export const CHARACTERS: Character[] = [
     ],
     imagePlaceholder: 'https://i.postimg.cc/7YvXmKNt/jeongsaun.png',
     themeSongTitle: 'Melting',
-    themeSongBase64: '/music/Melting.mp3',
+    themeSongUrl: 'https://drive.google.com/uc?export=download&confirm=t&id=18YKR5ex6okJRpiim5CZAa-3n5fyWOQrJ',
     sigColor: '#030534',
     symbol: 'Silver snake',
     systemInstruction: `
@@ -117,8 +117,8 @@ export const CHARACTERS: Character[] = [
       '술 비호 (고급 와인만 가끔 즐김)',
     ],
     imagePlaceholder: 'https://i.postimg.cc/KYsDLfz6/1.png',
-    themeSongTitle: 'Hymn of light',
-    themeSongBase64: '/music/Hymn of light.mp3',
+    themeSongTitle: '빛의 찬가',
+    themeSongUrl: 'https://drive.google.com/uc?export=download&confirm=t&id=12c2Z5Fi2f5DxEqSm816lDga3NkGT_RGr',
     sigColor: '#E4DCC9',
     symbol: 'Gyrfalcon',
     systemInstruction: `
@@ -152,7 +152,7 @@ export const CHARACTERS: Character[] = [
     ],
     imagePlaceholder: 'https://i.postimg.cc/SsMC9pHn/5.png',
     themeSongTitle: 'Still never cry',
-    themeSongBase64: '/music/Still never cry.mp3',
+    themeSongUrl: 'https://drive.google.com/uc?export=download&confirm=t&id=1_QG3zbRxO_XkszwQBozw-K52s3Jnde2Y',
     sigColor: '#0B0C10',
     symbol: 'Black lion',
     systemInstruction: `
@@ -185,8 +185,8 @@ export const CHARACTERS: Character[] = [
       '평정심 유지',
     ],
     imagePlaceholder: 'https://i.postimg.cc/YqkYvZRz/jemog-eul-iblyeoghaejuseyo-(2).png',
-    themeSongTitle: 'Unknown Strategy',
-    themeSongBase64: '/music/Unknown Strategy.mp3',
+    themeSongTitle: 'Love you recklessly',
+    themeSongUrl: 'https://drive.google.com/uc?export=download&confirm=t&id=1gOCMeObnNU0Nk8dQ2cOQRDBvzBfO-Fja',
     systemInstruction: `
       ${COMMON_SYSTEM_INSTRUCTION}
       당신의 이름은 송단우입니다. 전투본부장입니다.
@@ -217,7 +217,7 @@ export const CHARACTERS: Character[] = [
     ],
     imagePlaceholder: 'https://picsum.photos/400/605?grayscale&blur=2',
     themeSongTitle: 'Digital Silence',
-    themeSongBase64: '/music/Digital Silence.mp3',
+    themeSongUrl: '', // No link provided yet
     systemInstruction: `
       ${COMMON_SYSTEM_INSTRUCTION}
       당신의 이름은 필도섭입니다. 데이터본부장입니다.
