@@ -4,7 +4,7 @@ import { CHARACTERS } from "../constants";
 let client: GoogleGenAI | null = null;
 
 // User provided API Key
-const API_KEY = 'GEMINI_API_KEY_REDACTED';
+const API_KEY = process.env.API_KEY || '';
 
 // Initialize the Gemini client only when needed
 const getClient = (): GoogleGenAI => {
